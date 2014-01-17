@@ -1,0 +1,58 @@
+1. General structure of packet:
+    json_header null_byte binary_data
+
+    Example:
+        {"type": 0, "content_len": 16}\0some binary data
+
+2. Common fields in header for every packet:
+    "type" - type of packet [see chapter 3 "Packet types"]
+    "packet_id" - randomly generated number unique for every packet
+
+3. Packet types:
+    HANDSHAKE (0) - Initial handshake packet
+    Fields (additional to common):
+        "peer_id" - id of a peer who is initializing handshake
+
+    HANDSHAKE-ACCEPT (1) - Answer to HANDSHAKE packet
+        "peer_id"
+		"peers" - A peer that received this message should answer with
+				  a list of peers connected to him. Example:
+				  [[Ip1, Port1], [Ip2, Port2], ...]
+
+    LOOKUP (2) - Packet for searching music among other nodes
+    Fields:
+        "requester_ip" - ip of peer sending LOOKUP packet
+        "request_id" - id of request
+        "artist" \
+        "title"   - artist, title and album of song(-s)
+        "album"  /
+        "hops" - "time to life" of packet. If number of nodes redirecting
+                 packet exceeds value of "hops" field, packet must be 
+                 dropped and no more redirecting must occur.
+
+    FOUND (3) - Answer to LOOKUP
+    Fields:
+        "request_id" - request_id of corresponding LOOKUP packet
+        "results" - list of {"artist": ..., "album": ..., 
+                             "title": ..., "hash": ...} dicts
+
+    REQUEST-STREAM (4) - Requests new audio streams
+    Fields:
+        "stream_id" - id of stream
+        "hash" - sha1 hash of a file to be streamed
+        "chunk_size" - size of every chunk in the stream
+
+    READY-TO-STREAM (5) - Answer to REQUEST-STREAM
+    Fields:
+        "stream_id" - id of stream (same as in REQUEST-STREAM packet)
+        "size" - size of file to be streamed
+
+    REQUEST-PART (6) - Requests new part of existing audio stream
+    Fields:
+        "stream_id" - id of stream
+        "from" - number of chunk that is requsting
+
+    CONTENT (7) - Answer to REQUEST-STREAM. Contains audio data
+    Fields:
+        "stream_id"
+        "from"

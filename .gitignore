@@ -1,0 +1,12 @@
+.idea/
+build/
+dist/
+obj/
+*.bat
+*.suo
+*.pyproj
+.pydevproject
+.project
+*.un~
+*.vim
+*.pyc
